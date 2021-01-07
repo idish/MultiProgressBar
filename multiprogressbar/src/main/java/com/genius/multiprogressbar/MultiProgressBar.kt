@@ -30,6 +30,7 @@ class MultiProgressBar @JvmOverloads constructor(
     private var progressWidth = 10F
     private var singleProgressWidth: Float = 0F
     private var countOfProgressSteps: Int = 1
+    private var totalVideoDurationInMS: Long = -1
     private var isNeedRestoreProgressAfterRecreate: Boolean = false
     private var singleDisplayedTime: Float = 1F
 
@@ -92,6 +93,7 @@ class MultiProgressBar @JvmOverloads constructor(
             progressColor = this@MultiProgressBar.progressColor
             lineColor = this@MultiProgressBar.lineColor
             countProgress = this@MultiProgressBar.countOfProgressSteps
+            totalVideoDurationInMS = this@MultiProgressBar.totalVideoDurationInMS
             progressPercents = this@MultiProgressBar.progressPercents
             progressPadding = this@MultiProgressBar.progressPadding
             progressWidth = this@MultiProgressBar.progressWidth
@@ -116,6 +118,7 @@ class MultiProgressBar @JvmOverloads constructor(
         progressColor = state.progressColor
         lineColor = state.lineColor
         countOfProgressSteps = state.countProgress
+        totalVideoDurationInMS = state.totalVideoDurationInMS
         progressPercents = state.progressPercents
         progressPadding = state.progressPadding
         progressWidth = state.progressWidth
@@ -153,9 +156,19 @@ class MultiProgressBar @JvmOverloads constructor(
                 paint.changePaintModeToProgress()
             }
 
+
+            // If we're in the last step, we should draw it differently
+            if (step == countOfProgressSteps - 1) {
+                val lastStepDuration = totalVideoDurationInMS / 1000 % singleDisplayedTime
+            }
+
             canvas.drawLine(startX, measuredHeight / 2F, endX, measuredHeight / 2F, paint)
 
-            val progressMultiplier = currentAbsoluteProgress / progressPercents - step
+            val progressMultiplier = if (step == countOfProgressSteps - 1) {
+                (currentAbsoluteProgress / progressPercents - step) * progressPercents / (progressPercents / singleDisplayedTime * (totalVideoDurationInMS / 1000 % singleDisplayedTime))
+            } else {
+                currentAbsoluteProgress / progressPercents - step
+            }
             if (progressMultiplier < 1F && progressMultiplier > 0F) {
                 val progressEndX = startX + singleProgressWidth * progressMultiplier
                 paint.changePaintModeToProgress()
@@ -170,6 +183,10 @@ class MultiProgressBar @JvmOverloads constructor(
 
     fun setProgressStepsCount(progressSteps: Int) {
         internalSetProgressStepsCount(progressSteps)
+    }
+
+    fun setTotalVideoDuration(totalVideoDurationInMS: Long) {
+        this.totalVideoDurationInMS = totalVideoDurationInMS
     }
 
     fun getProgressStepsCount(): Int = countOfProgressSteps
@@ -243,9 +260,11 @@ class MultiProgressBar @JvmOverloads constructor(
     }
 
     private fun internalStartProgress() {
-        val maxValue = countOfProgressSteps * progressPercents.toFloat()
+//        15 seconds = 100 /
+//        5 seconds = 33
+        val maxValue = ((countOfProgressSteps - 1) * progressPercents) + progressPercents / singleDisplayedTime * (totalVideoDurationInMS / 1000 % singleDisplayedTime)
         activeAnimator = ValueAnimator.ofFloat(animatedAbsoluteProgress, maxValue).apply {
-            duration = (singleDisplayedTime * 1000 * countOfProgressSteps * (1 - (animatedAbsoluteProgress / maxValue))).toLong()
+            duration = (singleDisplayedTime * 1000 * (countOfProgressSteps - 1) + totalVideoDurationInMS / 1000f % singleDisplayedTime * 1000 * (1 - (animatedAbsoluteProgress / maxValue))).toLong()
             addUpdateListener { animator ->
                 val value = animator.animatedValue as Float
                 isProgressIsRunning = value != maxValue
@@ -320,6 +339,7 @@ class MultiProgressBar @JvmOverloads constructor(
         var animatedAbsoluteProgress: Float = 0F
         var currentAbsoluteProgress = 0F
         var countProgress: Int = 1
+        var totalVideoDurationInMS: Long = -1
         var progressPercents: Int = 0
         var displayedStepForListener: Int = -1
         var isProgressIsRunning: Boolean = false
@@ -332,6 +352,7 @@ class MultiProgressBar @JvmOverloads constructor(
             this.progressColor = `in`.readInt()
             this.lineColor = `in`.readInt()
             this.countProgress = `in`.readInt()
+            this.totalVideoDurationInMS = `in`.readLong()
             this.progressPercents = `in`.readInt()
             this.progressPadding = `in`.readFloat()
             this.progressWidth = `in`.readFloat()
@@ -349,6 +370,7 @@ class MultiProgressBar @JvmOverloads constructor(
             out.writeInt(this.progressColor)
             out.writeInt(this.lineColor)
             out.writeInt(this.countProgress)
+            out.writeLong(this.totalVideoDurationInMS)
             out.writeInt(this.progressPercents)
             out.writeFloat(this.progressPadding)
             out.writeFloat(this.progressWidth)
