@@ -189,6 +189,10 @@ class MultiProgressBar @JvmOverloads constructor(
         this.totalVideoDurationInMS = totalVideoDurationInMS
     }
 
+    fun setSingleDisplayedTime(singleDisplayedTime: Float) {
+        this.singleDisplayedTime = singleDisplayedTime
+    }
+
     fun getProgressStepsCount(): Int = countOfProgressSteps
 
     fun start() {
