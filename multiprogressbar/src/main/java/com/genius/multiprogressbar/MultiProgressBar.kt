@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.os.Parcel
 import android.view.animation.LinearInterpolator
+import android.widget.Toast
 import kotlin.math.min
 
 @Suppress("UNUSED")
@@ -30,7 +31,7 @@ class MultiProgressBar @JvmOverloads constructor(
     private var progressWidth = 10F
     private var singleProgressWidth: Float = 0F
     private var countOfProgressSteps: Int = 1
-    private var totalVideoDurationInMS: Long = -1
+    var totalVideoDurationInMS: Long = -1
     private var isNeedRestoreProgressAfterRecreate: Boolean = false
     private var singleDisplayedTime: Float = 1F
 
@@ -40,7 +41,7 @@ class MultiProgressBar @JvmOverloads constructor(
     private var currentAbsoluteProgress = 0F
     private var animatedAbsoluteProgress = 0F
     private var isProgressIsRunning = false
-    private var displayedStepForListener = -1
+    var displayedStepForListener = -1
     private var activeAnimator: ValueAnimator? = null
 
     init {
@@ -156,16 +157,13 @@ class MultiProgressBar @JvmOverloads constructor(
                 paint.changePaintModeToProgress()
             }
 
-
-            // If we're in the last step, we should draw it differently
-            if (step == countOfProgressSteps - 1) {
-                val lastStepDuration = totalVideoDurationInMS / 1000 % singleDisplayedTime
-            }
-
             canvas.drawLine(startX, measuredHeight / 2F, endX, measuredHeight / 2F, paint)
-
             val progressMultiplier = if (step == countOfProgressSteps - 1) {
-                (currentAbsoluteProgress / progressPercents - step) * progressPercents / (progressPercents / singleDisplayedTime * (totalVideoDurationInMS / 1000 % singleDisplayedTime))
+                if (totalVideoDurationInMS % (singleDisplayedTime * 1000) == 0f) {
+                    currentAbsoluteProgress / progressPercents - step
+                } else {
+                    (currentAbsoluteProgress / progressPercents - step) * progressPercents / (progressPercents / singleDisplayedTime * (totalVideoDurationInMS / 1000 % singleDisplayedTime))
+                }
             } else {
                 currentAbsoluteProgress / progressPercents - step
             }
@@ -183,10 +181,6 @@ class MultiProgressBar @JvmOverloads constructor(
 
     fun setProgressStepsCount(progressSteps: Int) {
         internalSetProgressStepsCount(progressSteps)
-    }
-
-    fun setTotalVideoDuration(totalVideoDurationInMS: Long) {
-        this.totalVideoDurationInMS = totalVideoDurationInMS
     }
 
     fun setSingleDisplayedTime(singleDisplayedTime: Float) {
@@ -266,9 +260,25 @@ class MultiProgressBar @JvmOverloads constructor(
     private fun internalStartProgress() {
 //        15 seconds = 100 /
 //        5 seconds = 33
-        val maxValue = ((countOfProgressSteps - 1) * progressPercents) + progressPercents / singleDisplayedTime * (totalVideoDurationInMS / 1000 % singleDisplayedTime)
+        val maxValue = if (singleDisplayedTime.toDouble() == totalVideoDurationInMS / 1000.0) {
+            100f
+        } else {
+                if (totalVideoDurationInMS % (singleDisplayedTime * 1000) == 0f) {
+                    (countOfProgressSteps * progressPercents).toFloat()
+                } else {
+                    ((countOfProgressSteps - 1) * progressPercents) + progressPercents / singleDisplayedTime * (totalVideoDurationInMS / 1000 % singleDisplayedTime)
+                }
+        }
         activeAnimator = ValueAnimator.ofFloat(animatedAbsoluteProgress, maxValue).apply {
-            duration = (singleDisplayedTime * 1000 * (countOfProgressSteps - 1) + totalVideoDurationInMS / 1000f % singleDisplayedTime * 1000 * (1 - (animatedAbsoluteProgress / maxValue))).toLong()
+            duration = if (singleDisplayedTime.toDouble() == totalVideoDurationInMS / 1000.0) {
+                totalVideoDurationInMS
+            } else {
+                    if (totalVideoDurationInMS % (singleDisplayedTime * 1000) == 0f) {
+                        totalVideoDurationInMS - ((singleDisplayedTime * 1000 * (animatedAbsoluteProgress / progressPercents))).toLong()
+                    } else {
+                        totalVideoDurationInMS - ((singleDisplayedTime * 1000 * (animatedAbsoluteProgress / progressPercents))).toLong()
+                    }
+            }
             addUpdateListener { animator ->
                 val value = animator.animatedValue as Float
                 isProgressIsRunning = value != maxValue
@@ -300,7 +310,13 @@ class MultiProgressBar @JvmOverloads constructor(
     private fun internalSetProgressStepsCount(count: Int) {
         countOfProgressSteps = count
         singleProgressWidth = (measuredWidth - progressPadding * countOfProgressSteps - progressPadding) / countOfProgressSteps
-        check(!(measuredWidth != 0 && singleProgressWidth < 0)) { "There is not enough space to draw a MultiProgressBar" }
+        if (measuredWidth != 0 && singleProgressWidth < 0) {
+            Toast.makeText(
+                context,
+                "There is not enough space to draw the upper story bar",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     private fun Paint.changePaintModeToProgress() {
