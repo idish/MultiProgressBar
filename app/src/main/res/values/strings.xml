@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">MultiProgressBarExample</string>
+    <string name="start">START</string>
+    <string name="pause">PAUSE</string>
+    <string name="next">NEXT</string>
+    <string name="previous">PREVIOUS</string>
+    <string name="plus_second">PLUS DURATION</string>
+    <string name="minus_second">MINUS DURATION</string>
+    <string name="clear">CLEAR</string>
 </resources>

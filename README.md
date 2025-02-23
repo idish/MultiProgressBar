@@ -1,6 +1,6 @@
 # MultiProgressBar
 
-[ ![Download](https://api.bintray.com/packages/geniusrus/MultiProgressBar/com.geniusrus.MultiProgressBar/images/download.svg) ](https://bintray.com/geniusrus/MultiProgressBar/com.geniusrus.MultiProgressBar/_latestVersion)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.geniusrus/multiprogressbar/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.geniusrus/multiprogressbar)
 [![codebeat badge](https://codebeat.co/badges/68c23e0f-9f62-4443-a05b-490baaff8f9d)](https://codebeat.co/projects/github-com-geniusrus-multiprogressbar-master)
 
 <img src="https://media.giphy.com/media/2wh244C33YbFTPr6zx/giphy.gif" width="278" height="480"/>
@@ -34,6 +34,7 @@ Also the following api allows you to control the display of progress:
 1. `setListener(listener: ProgressStepChangeListener)` - sets the listener `ProgressStepChangeListener` to switch progress blocks
 1. `setProgressPercents(progress: Int` - sets the number of percent for calculating the progress scale
 1. `setProgressStepsCount(stepsCount: Int)` - sets the total number of progress steps
+1. `setSingleDisplayTime(singleDisplayedTime: Float)` - sets the display time of one cell. Can be used in runtime
 
 ``` kotlin
 interface ProgressStepChangeListener {
@@ -43,9 +44,17 @@ interface ProgressStepChangeListener {
 
 ## Usage
 
-Library available via JCenter:
+Artifact is publishing to Maven Central. You can add this repository to your project with:
+```gradle
+repositories {
+    mavenCentral()
+}
+```
 
-`implementation 'com.geniusrus.multiprogressbar:multiprogressbar:latest_version'`
+Add to your .gradle file:
+```gradle
+implementation "io.github.geniusrus:multiprogressbar:$latest_version"
+```
 
 ## Sample
 
@@ -62,4 +71,3 @@ Yandex: [Gen1usRUS@yandex.ru](mailto:Gen1usRUS@yandex.ru)
 Apache v2.0 License
 
 Copyright (c) 2019 Viktor Likhanov
-
