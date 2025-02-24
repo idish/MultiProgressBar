@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    compileSdk = 31
+    compileSdk = 32
     defaultConfig {
         applicationId = "com.genius.multiprogressbarexample"
         minSdk = 16
-        targetSdk = 31
+        targetSdk = 32
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -29,9 +29,10 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+    implementation("com.google.android.material:material:1.5.0")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.mockito:mockito-core:4.1.0")
+    testImplementation("org.mockito:mockito-core:4.4.0")
     testImplementation("androidx.test:core:1.4.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.test:runner:1.4.0")

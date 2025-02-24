@@ -7,15 +7,21 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="@string/app_name_with_username"/>
+
     <com.genius.multiprogressbar.MultiProgressBar
         android:id="@+id/mpb_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        app:lineColor="@color/warm_grey"
+        app:progressLineColor="@color/warm_grey"
         app:progressColor="@color/colorAccent"
         app:progressSteps="9"
-        app:singleDisplayedTime="5.0" />
+        app:progressSingleDisplayedTime="5.0" />
 
     <LinearLayout
         android:id="@+id/ll_start_pause"
@@ -29,11 +35,21 @@
             android:id="@+id/b_start"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0.7"
             android:drawableStart="@drawable/ic_play_arrow_black_24dp"
             android:drawableLeft="@drawable/ic_play_arrow_black_24dp"
             android:onClick="onClick"
             android:text="@string/start" />
+
+        <EditText
+            android:id="@+id/et_start_from"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:inputType="numberDecimal"
+            android:autofillHints="none"
+            android:imeOptions="actionNone"
+            android:hint="@string/start_from_hint"/>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/b_pause"
@@ -104,15 +120,32 @@
             android:text="@string/minus_second" />
     </LinearLayout>
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/b_clear"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/ll_clear_discrete"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/ll_plus_minus_second"
-        android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
-        android:drawableStart="@drawable/ic_clear_black_24dp"
-        android:drawableLeft="@drawable/ic_clear_black_24dp"
-        android:onClick="onClick"
-        android:text="@string/clear" />
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/b_clear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableStart="@drawable/ic_clear_black_24dp"
+            android:drawableLeft="@drawable/ic_clear_black_24dp"
+            android:onClick="onClick"
+            android:text="@string/clear" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/b_discrete"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableStart="@drawable/ic_linear_scale_black_24dp"
+            android:drawableLeft="@drawable/ic_linear_scale_black_24dp"
+            android:onClick="onClick"
+            android:text="@string/discrete" />
+    </LinearLayout>
 </RelativeLayout>
