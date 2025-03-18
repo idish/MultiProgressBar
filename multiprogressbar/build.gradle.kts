@@ -51,6 +51,7 @@ android {
 
 dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.firebase:firebase-crashlytics-ktx:19.4.1")
 //    implementation(kotlin("stdlib-jdk7", KotlinCompilerVersion.VERSION))
 
     testImplementation("junit:junit:4.13.2")

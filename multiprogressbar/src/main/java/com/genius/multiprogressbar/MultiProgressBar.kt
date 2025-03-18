@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.annotation.FloatRange
 import androidx.annotation.IntDef
 import androidx.annotation.IntRange
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 @Suppress("UNUSED")
 class MultiProgressBar @JvmOverloads constructor(
@@ -405,8 +406,6 @@ class MultiProgressBar @JvmOverloads constructor(
     }
 
     private fun internalStartProgress() {
-//        15 seconds = 100 /
-//        5 seconds = 33
         val maxValue = if (singleDisplayedTime.toDouble() == totalVideoDurationInMS / 1000.0) {
             100f
         } else {
@@ -416,16 +415,30 @@ class MultiProgressBar @JvmOverloads constructor(
                     ((countOfProgressSteps - 1) * progressPercents) + progressPercents / singleDisplayedTime * (totalVideoDurationInMS / 1000 % singleDisplayedTime)
                 }
         }
-        activeAnimator = ValueAnimator.ofFloat(animatedAbsoluteProgress, maxValue).apply {
-            duration = if (singleDisplayedTime.toDouble() == totalVideoDurationInMS / 1000.0) {
-                totalVideoDurationInMS
+        // Calculate your duration first, then clamp it before building the animator.
+        val rawDuration = if (singleDisplayedTime.toDouble() == totalVideoDurationInMS / 1000.0) {
+            totalVideoDurationInMS
+        } else {
+            if (totalVideoDurationInMS % (singleDisplayedTime * 1000) == 0f) {
+                totalVideoDurationInMS - ((singleDisplayedTime * 1000 * (animatedAbsoluteProgress / progressPercents))).toLong()
             } else {
-                    if (totalVideoDurationInMS % (singleDisplayedTime * 1000) == 0f) {
-                        totalVideoDurationInMS - ((singleDisplayedTime * 1000 * (animatedAbsoluteProgress / progressPercents))).toLong()
-                    } else {
-                        totalVideoDurationInMS - ((singleDisplayedTime * 1000 * (animatedAbsoluteProgress / progressPercents))).toLong()
-                    }
+                totalVideoDurationInMS - ((singleDisplayedTime * 1000 * (animatedAbsoluteProgress / progressPercents))).toLong()
             }
+        }
+
+// Now clamp and decide what to do if duration <= 0.
+        var finalDuration = rawDuration
+        if (finalDuration <= 0L) {
+            // No real time left to animate. Finalize immediately or skip:
+            finalDuration = 0L
+            currentAbsoluteProgress = maxValue
+            animatedAbsoluteProgress = maxValue
+            finishListener?.onProgressFinished()
+            return
+        }
+
+        activeAnimator = ValueAnimator.ofFloat(animatedAbsoluteProgress, maxValue).apply {
+            duration = finalDuration
             addUpdateListener { animator ->
                 val value = animator.animatedValue as Float
                 isProgressIsRunning = value != maxValue
